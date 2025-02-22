@@ -1,5 +1,6 @@
 package com.example.summarizer.summarizer.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ public class NotesEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonProperty("user")
+    @JsonBackReference
     private UserEntity user;
 
     @Column(nullable = false, length = 225)

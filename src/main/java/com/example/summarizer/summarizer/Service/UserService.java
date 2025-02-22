@@ -14,16 +14,16 @@ import java.util.UUID;
 
 @Service
 public class UserService {
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
-    private JWTservice jwtService;
-    @Autowired
-    private AuthenticationManager authManager;
+    private final JWTservice jwtService;
+    private final AuthenticationManager authManager;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-    public UserService(UserRepository userRepository) {
+    @Autowired
+    public UserService(UserRepository userRepository, JWTservice jwtService, AuthenticationManager authManager) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
+        this.authManager = authManager;
     }
 
     public Optional<UserEntity> getUserById(UUID userId){
@@ -40,9 +40,21 @@ public class UserService {
     }
 
     public String verify(UserEntity user){
+        UserEntity existingUser = userRepository.findByUsername(user.getUsername());
+        if (existingUser == null) {
+            System.out.println("User not found");
+            return "errors";
+        }
+
+        if (!encoder.matches(user.getPassword(), existingUser.getPassword())) {
+            System.out.println("Password does not match!");
+            return "errors";
+        }
+
         Authentication authentication =
                 authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         if(authentication.isAuthenticated()){
+            System.out.println("user authenticated");
             return jwtService.generateToken(user.getUsername());
         }
 

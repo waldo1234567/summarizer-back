@@ -28,6 +28,7 @@ public class JWTservice {
         try{
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
             SecretKey sk = keyGen.generateKey();
+            System.out.println("Generate Secret key invoked?");
             return Base64.getEncoder().encodeToString(sk.getEncoded());
         }
         catch (NoSuchAlgorithmException e) {
@@ -35,19 +36,28 @@ public class JWTservice {
         }
     }
     public String generateToken(String username){
-        Map<String,Object> claims = new HashMap<>();
-        return Jwts.builder()
-                .claims()
-                .add(claims)
-                .subject(username)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 60))
-                .and()
-                .signWith(getKey())
-                .compact();
+        try{
+            System.out.println("through here?");
+            Map<String,Object> claims = new HashMap<>();
+            return Jwts.builder()
+                    .claims()
+                    .add(claims)
+                    .subject(username)
+                    .issuedAt(new Date(System.currentTimeMillis()))
+                    .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                    .and()
+                    .signWith(getKey())
+                    .compact();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Error generating token: " + e.getMessage());
+            return null;
+        }
+
     }
 
     private SecretKey getKey(){
+        System.out.println("Get Key Invoked?");
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
